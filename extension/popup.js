@@ -1,5 +1,5 @@
 // Configuration
-const API_BASE = "http://localhost:3000"; // Change to your deployed web app origin
+const API_BASE = "http://localhost:3003"; // Change to your deployed web app origin
 
 // DOM elements
 const textEl = document.getElementById('text');
