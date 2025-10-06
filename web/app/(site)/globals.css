@@ -1,0 +1,161 @@
+@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&display=swap');
+
+:root { 
+  color-scheme: light dark; 
+  /* Brand colors */
+  --brand-black: #000000;
+  --brand-white: #ffffff;
+  --brand-darkgrey: #5a5a5a;
+  --brand-lightgrey: #e9ecef;
+  --brand-yellow: #e8ff00; /* neon-ish */
+  --brand-pink: #ff4fb2;
+  --brand-blue: #39d1ff;
+  --brand-green: #00e17a;
+  --brand-purple: #8b5cff;
+  --brand-red: #ff2d2d;
+}
+
+* { 
+  box-sizing: border-box; 
+}
+
+body { 
+  margin: 0; 
+  font-family: 'Lora', Georgia, 'Times New Roman', serif; 
+  background-color: #fff;
+  color: #333;
+}
+
+button { 
+  border: 1px solid var(--brand-darkgrey); 
+  border-radius: 8px; 
+  padding: 6px 10px; 
+  cursor: pointer;
+  background: var(--brand-yellow);
+  color: var(--brand-black);
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+button:hover {
+  background: var(--brand-pink);
+  color: var(--brand-white);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+input, textarea { 
+  border: 1px solid #ccc; 
+  border-radius: 8px; 
+  padding: 6px 8px;
+  font-family: inherit;
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border-color: var(--brand-blue);
+}
+
+a {
+  color: var(--brand-blue);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.card {
+  border: 2px solid var(--brand-lightgrey);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  background: var(--brand-white);
+  transition: all 0.2s;
+}
+
+.card:hover {
+  border-color: var(--brand-blue);
+  box-shadow: 0 4px 16px rgba(57, 209, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.status-open {
+  background: var(--brand-yellow);
+  color: var(--brand-black);
+  border: 1px solid var(--brand-yellow);
+  font-weight: 600;
+}
+
+.status-triaged {
+  background: var(--brand-blue);
+  color: var(--brand-white);
+  border: 1px solid var(--brand-blue);
+  font-weight: 600;
+}
+
+.status-resolved {
+  background: var(--brand-green);
+  color: var(--brand-white);
+  border: 1px solid var(--brand-green);
+  font-weight: 600;
+}
+
+/* Header brand accent */
+header a:first-child {
+  font-weight: 700;
+  color: var(--brand-black);
+  text-decoration: none;
+  background: var(--brand-yellow);
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 2px solid var(--brand-black);
+}
+
+/* Add brand color classes for special buttons */
+.btn-primary {
+  background: var(--brand-blue) !important;
+  color: var(--brand-white) !important;
+  border-color: var(--brand-blue) !important;
+}
+
+.btn-primary:hover {
+  background: var(--brand-green) !important;
+  border-color: var(--brand-green) !important;
+}
+
+.btn-success {
+  background: var(--brand-green) !important;
+  color: var(--brand-white) !important;
+  border-color: var(--brand-green) !important;
+}
+
+.btn-success:hover {
+  background: var(--brand-blue) !important;
+  border-color: var(--brand-blue) !important;
+}
+
+.btn-danger {
+  background: var(--brand-red) !important;
+  color: var(--brand-white) !important;
+  border-color: var(--brand-red) !important;
+}
+
+.btn-danger:hover {
+  background: var(--brand-purple) !important;
+  border-color: var(--brand-purple) !important;
+}

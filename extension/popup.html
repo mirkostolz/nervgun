@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>nervgun</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>nervgun</h1>
+    <div id="meta" class="meta"></div>
+    <textarea id="text" maxlength="500" placeholder="Was nervt dich hier?"></textarea>
+    <div class="actions">
+      <button id="btn-shot">Screenshot anhängen</button>
+      <button id="btn-send" class="primary">Senden</button>
+    </div>
+    <div id="shot-wrap" class="shot-wrap hidden">
+      <div class="toolbar">
+        <span>Redaktion: Ziehe schwarze Kästen über sensible Bereiche</span>
+        <button id="btn-clear">Löschen</button>
+        <button id="btn-apply">Bestätigen</button>
+      </div>
+      <canvas id="canvas"></canvas>
+    </div>
+    <div id="toast" class="toast hidden"></div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

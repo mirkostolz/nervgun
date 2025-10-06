@@ -1,0 +1,149 @@
+@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&display=swap');
+
+:root {
+  --brand-black: #000000;
+  --brand-white: #ffffff;
+  --brand-darkgrey: #5a5a5a;
+  --brand-lightgrey: #e9ecef;
+  --brand-yellow: #e8ff00;
+  --brand-pink: #ff4fb2;
+  --brand-blue: #39d1ff;
+  --brand-green: #00e17a;
+  --brand-purple: #8b5cff;
+  --brand-red: #ff2d2d;
+}
+
+body { 
+  font-family: 'Lora', Georgia, 'Times New Roman', serif; 
+  margin: 0; 
+  background: var(--brand-white);
+}
+
+.container { 
+  width: 360px; 
+  padding: 12px; 
+}
+
+h1 { 
+  font-size: 16px; 
+  margin: 0 0 8px; 
+  color: var(--brand-black);
+  background: var(--brand-yellow);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.meta { 
+  font-size: 12px; 
+  color: #666; 
+  margin-bottom: 8px; 
+  padding: 4px 8px;
+  background: var(--brand-lightgrey);
+  border-radius: 4px;
+}
+
+textarea { 
+  width: 100%; 
+  min-height: 96px; 
+  resize: vertical; 
+  padding: 8px; 
+  border: 1px solid #ccc; 
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: var(--brand-blue);
+}
+
+.actions { 
+  display: flex; 
+  gap: 8px; 
+  margin-top: 8px; 
+}
+
+button { 
+  padding: 8px 10px; 
+  border-radius: 8px; 
+  border: 1px solid var(--brand-darkgrey); 
+  background: var(--brand-yellow); 
+  color: var(--brand-black);
+  font-weight: 500;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+button:hover {
+  background: var(--brand-pink);
+  color: var(--brand-white);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+button.primary { 
+  background: var(--brand-blue); 
+  color: var(--brand-white); 
+  border-color: var(--brand-blue); 
+}
+
+button.primary:hover {
+  background: var(--brand-green);
+  border-color: var(--brand-green);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.shot-wrap { 
+  margin-top: 10px; 
+  border: 1px solid #ddd; 
+  border-radius: 8px; 
+  padding: 8px; 
+}
+
+.hidden { 
+  display: none; 
+}
+
+.toolbar { 
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  font-size: 12px; 
+  margin-bottom: 6px; 
+  color: #666;
+}
+
+#canvas { 
+  width: 100%; 
+  max-height: 300px; 
+  background: #eee; 
+  border-radius: 6px; 
+  cursor: crosshair;
+}
+
+.toast { 
+  position: fixed; 
+  bottom: 8px; 
+  left: 8px; 
+  right: 8px; 
+  background: var(--brand-black); 
+  color: var(--brand-white); 
+  padding: 8px 10px; 
+  border-radius: 8px; 
+  font-size: 12px; 
+  z-index: 1000;
+}
+
+.toast.error {
+  background: var(--brand-red);
+}
+
+.toast.success {
+  background: var(--brand-green);
+}
