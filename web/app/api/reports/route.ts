@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '../../../lib/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../lib/auth';
+import { rateLimit } from '../../../lib/rate-limit';
 
 function parseDataUrl(dataUrl: string): Buffer | null {
   try {
@@ -40,6 +41,15 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  // Rate limiting
+  const rateLimitResult = rateLimit(req, '/api/reports');
+  if (!rateLimitResult.allowed) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again later.' }, 
+      { status: 429 }
+    );
+  }
+
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     return new NextResponse('Unauthenticated', { status: 401 });
@@ -54,6 +64,13 @@ export async function POST(req: NextRequest) {
   if (body.screenshotDataUrl) {
     const b = parseDataUrl(body.screenshotDataUrl);
     if (!b) return new NextResponse('Invalid image format', { status: 400 });
+    
+    // Validate MIME type
+    const mimeType = body.screenshotDataUrl.split(';')[0].split(':')[1];
+    if (!['image/png', 'image/jpeg', 'image/jpg'].includes(mimeType)) {
+      return new NextResponse('Invalid image type. Only PNG and JPEG allowed.', { status: 400 });
+    }
+    
     const max = Number(process.env.MAX_IMAGE_BYTES || 5242880); // 5MB for higher quality screenshots
     if (b.byteLength > max) return new NextResponse('Image too large', { status: 413 });
     bytes = b;
