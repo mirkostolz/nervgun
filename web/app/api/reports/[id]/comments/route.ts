@@ -5,7 +5,7 @@ import { authOptions } from '../../../../../lib/auth';
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
+  if (!session?.user?.email) {
     return new NextResponse('Unauthenticated', { status: 401 });
   }
   
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   const c = await prisma.comment.create({ 
     data: { 
       text: body.text.trim(), 
-      authorId: session.user.id, 
+      authorId: (session.user as any).id, 
       reportId: params.id 
     } 
   });

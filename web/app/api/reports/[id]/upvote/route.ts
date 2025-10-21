@@ -5,14 +5,14 @@ import { authOptions } from '../../../../../lib/auth';
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
+  if (!session?.user?.email) {
     return new NextResponse('Unauthenticated', { status: 401 });
   }
 
   const existing = await prisma.upvote.findUnique({ 
     where: { 
       userId_reportId: { 
-        userId: session.user.id, 
+        userId: (session.user as any).id, 
         reportId: params.id 
       } 
     } 
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     await prisma.upvote.delete({ 
       where: { 
         userId_reportId: { 
-          userId: session.user.id, 
+          userId: (session.user as any).id, 
           reportId: params.id 
         } 
       } 
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   } else {
     await prisma.upvote.create({ 
       data: { 
-        userId: session.user.id, 
+        userId: (session.user as any).id, 
         reportId: params.id 
       } 
     });

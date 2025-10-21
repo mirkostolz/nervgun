@@ -5,7 +5,7 @@ import { authOptions } from '../../../../../lib/auth';
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
+  if (!session?.user?.email) {
     return new NextResponse('Unauthenticated', { status: 401 });
   }
   
@@ -17,7 +17,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
   // Check if user is a triager
   const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
+    where: { id: (session.user as any).id },
     select: { role: true }
   });
   

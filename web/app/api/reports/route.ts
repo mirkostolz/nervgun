@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
   const status = searchParams.get('status');
   
   const where = status ? { status: status.toUpperCase() as any } : {};
-  const orderBy = sort === 'top' ? { upvotes: { _count: 'desc' } } : { createdAt: 'desc' };
+  const orderBy = sort === 'top' ? { upvotes: { _count: 'desc' as any } } : { createdAt: 'desc' as any };
   
   const items = await prisma.report.findMany({
     where,
@@ -75,15 +75,15 @@ export async function POST(req: NextRequest) {
   
   // Temporary development bypass - remove in production
   const isDevelopment = process.env.NODE_ENV === 'development';
-  if (!session?.user?.id && !isDevelopment) {
+  if (!session?.user?.email && !isDevelopment) {
     return new NextResponse('Unauthenticated', { status: 401, headers: corsHeaders });
   }
   
   // Use a default user ID for development
-  let userId = session?.user?.id || 'dev-user-id';
+  let userId = (session?.user as any)?.id || 'dev-user-id';
   
   // Create a default user if it doesn't exist
-  if (isDevelopment && !session?.user?.id) {
+  if (isDevelopment && !(session?.user as any)?.id) {
     try {
       await prisma.user.upsert({
         where: { id: 'dev-user-id' },
