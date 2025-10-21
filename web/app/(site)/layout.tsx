@@ -21,7 +21,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </span>
           <span style={{ flex: 1 }} />
           <form action="/api/auth/signout" method="post">
-            <button type="submit" style={{ fontSize: '14px' }}>Logout</button>
+            <button type="submit" style={{ 
+              fontSize: '14px',
+              background: '#dc3545',
+              color: 'white',
+              border: 'none',
+              padding: '6px 12px',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}>Logout</button>
           </form>
         </header>
         <main style={{

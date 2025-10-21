@@ -3,7 +3,7 @@ import 'server-only';
 const isProduction = process.env.NODE_ENV === 'production';
 
 const defaultsForDev = {
-  NEXTAUTH_URL: 'http://localhost:3001',
+  NEXTAUTH_URL: 'http://localhost:3000',
   NEXTAUTH_SECRET: 'dev-nextauth-secret-change-me',
   GOOGLE_CLIENT_ID: 'dev-google-client-id',
   GOOGLE_CLIENT_SECRET: 'dev-google-client-secret',

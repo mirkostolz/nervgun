@@ -1,5 +1,5 @@
 // Configuration
-const API_BASE = "http://localhost:3003"; // Change to your deployed web app origin
+const API_BASE = "http://localhost:3000"; // Change to your deployed web app origin
 
 // DOM elements
 const textEl = document.getElementById('text');
@@ -18,7 +18,35 @@ let confirmedImageDataUrl = null;
 let rects = [];
 let ctx = null;
 let img = null;
-let draft = null;
+
+// Redaction state management
+const redactionState = {
+  draft: null,
+  
+  startRect(e) {
+    const pos = relPos(e);
+    this.draft = { x: pos.x, y: pos.y, w: 0, h: 0 };
+  },
+  
+  updateRect(e) {
+    if (this.draft) {
+      const p = relPos(e);
+      this.draft.w = p.x - this.draft.x;
+      this.draft.h = p.y - this.draft.y;
+      redraw();
+    }
+  },
+  
+  finalizeRect() {
+    if (this.draft) {
+      if (Math.abs(this.draft.w) > 4 && Math.abs(this.draft.h) > 4) {
+        rects.push(normRect(this.draft));
+      }
+      this.draft = null;
+      redraw();
+    }
+  }
+};
 
 // Initialize
 async function init() {
@@ -106,23 +134,17 @@ function relPos(e) {
   };
 }
 
+// Redaction functions using state management
 function startRect(e) { 
-  draft = { ...relPos(e), w: 0, h: 0 }; 
+  redactionState.startRect(e);
 }
 
 function updateRect(e) {
-  const p = relPos(e);
-  draft.w = p.x - draft.x;
-  draft.h = p.y - draft.y;
-  redraw();
+  redactionState.updateRect(e);
 }
 
 function finalizeRect() { 
-  if (draft && Math.abs(draft.w) > 4 && Math.abs(draft.h) > 4) { 
-    rects.push(normRect(draft)); 
-  } 
-  draft = null; 
-  redraw(); 
+  redactionState.finalizeRect();
 }
 
 function normRect(r) {
@@ -139,8 +161,8 @@ function redraw() {
   ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
   ctx.fillStyle = '#000';
   rects.forEach(r => ctx.fillRect(r.x, r.y, r.w, r.h));
-  if (draft) { 
-    const r = normRect(draft); 
+  if (redactionState.draft) { 
+    const r = normRect(redactionState.draft); 
     ctx.fillRect(r.x, r.y, r.w, r.h); 
   }
 }
@@ -153,6 +175,7 @@ canvas.addEventListener('mouseup', finalizeRect);
 // Redaction buttons
 btnClear.addEventListener('click', () => { 
   rects = []; 
+  redactionState.draft = null;
   redraw(); 
 });
 
