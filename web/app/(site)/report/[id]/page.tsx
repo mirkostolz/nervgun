@@ -80,8 +80,8 @@ export default function Report({ params }: { params: { id: string } }) {
         transition: 'color 0.2s ease',
         display: 'inline-block'
       }}
-      onMouseEnter={(e) => e.target.style.color = '#0056b3'}
-      onMouseLeave={(e) => e.target.style.color = '#007bff'}
+      onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.color = '#0056b3'}
+      onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.color = '#007bff'}
       >
         ← Zurück zur Übersicht
       </Link>
