@@ -14,13 +14,17 @@ Supabase provides:
 
 ## Step 1: Create Supabase Project
 
+**Note**: You can use your existing Supabase account! Just create a new project for nervgun. Each project is completely isolated with its own database, API keys, and resources.
+
 1. Go to [https://supabase.com](https://supabase.com)
-2. Sign up or log in
-3. Click **"New Project"**
+2. **Log in** to your existing account (or sign up if you don't have one)
+3. Click **"New Project"** in your organization/dashboard
+   - Free tier allows **2 projects** per organization
+   - Each project is completely separate (different database, credentials, etc.)
 4. Fill in:
    - **Name**: `nervgun` (or your preferred name)
    - **Database Password**: Generate a strong password (SAVE THIS!)
-   - **Region**: Choose closest to your users
+   - **Region**: Choose closest to your users (can be different from your other projects)
    - **Plan**: Free tier is fine to start
 5. Click **"Create new project"**
 6. Wait 2-3 minutes for provisioning
