@@ -3,7 +3,9 @@ web/node_modules/
 web/.next/
 web/.turbo/
 web/.vercel/
-web/.env*
+web/.env
+web/.env.local
+web/.env*.local
 web/next-env.d.ts
 
 # Prisma/DB
@@ -30,4 +32,6 @@ web/dev.db
 extension/*.zip
 
 # Misc
-.env*
+.env
+.env.local
+.env*.local
