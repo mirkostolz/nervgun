@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import './globals.css';
 import type { Metadata } from 'next';
+import { LogoutButton } from './LogoutButton';
 
 export const metadata: Metadata = {
   title: 'nervgun - Attacke auf das, was uns nervt',
@@ -26,9 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             Attacke auf das, was uns nervt
           </span>
           <span style={{ flex: 1 }} />
-          <form action="/api/auth/signout" method="post">
-            <button type="submit" style={{ fontSize: '14px' }}>Logout</button>
-          </form>
+          <LogoutButton />
         </header>
         <main style={{
           maxWidth: 900, 
