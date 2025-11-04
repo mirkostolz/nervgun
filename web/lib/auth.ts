@@ -63,7 +63,6 @@ export const authOptions: NextAuthOptions = {
   secret: env.NEXTAUTH_SECRET,
   pages: {
     signOut: '/',
-    error: '/auth/error',
   },
   cookies: {
     sessionToken: {
