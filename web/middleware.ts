@@ -65,5 +65,9 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = { 
-  matcher: ['/', '/report/:path*', '/api/reports/:path*'] 
+  matcher: [
+    '/',
+    '/report/:path*',
+    '/api/:path*'  // Match ALL API routes including /api/reports
+  ]
 };
