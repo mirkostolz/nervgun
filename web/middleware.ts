@@ -5,8 +5,27 @@ export function middleware(req: NextRequest) {
   const isApiAuth = req.nextUrl.pathname.startsWith('/api/auth');
   if (isApiAuth) return NextResponse.next();
 
+  const isApiRoute = req.nextUrl.pathname.startsWith('/api/');
+  
+  // Handle CORS preflight requests (OPTIONS) for API routes
+  if (isApiRoute && req.method === 'OPTIONS') {
+    const response = new NextResponse(null, { status: 200 });
+    response.headers.set('Access-Control-Allow-Origin', req.headers.get('origin') || '*');
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    response.headers.set('Access-Control-Allow-Credentials', 'true');
+    response.headers.set('Access-Control-Max-Age', '86400');
+    return response;
+  }
+
   // Add security headers for all environments
   const response = NextResponse.next();
+  
+  // Add CORS headers for API routes (for Chrome extension support)
+  if (isApiRoute) {
+    response.headers.set('Access-Control-Allow-Origin', req.headers.get('origin') || '*');
+    response.headers.set('Access-Control-Allow-Credentials', 'true');
+  }
   
   // Security headers for production
   response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
@@ -27,7 +46,12 @@ export function middleware(req: NextRequest) {
     "base-uri 'self'"
   );
   
-  // In production enforce auth redirect; in development allow access for testing
+  // Skip auth redirect for API routes (auth is handled in the routes themselves)
+  if (isApiRoute) {
+    return response;
+  }
+  
+  // In production enforce auth redirect for pages; in development allow access for testing
   if (process.env.NODE_ENV === 'production') {
     const hasSession = req.cookies.has('next-auth.session-token') ||
                       req.cookies.has('__Secure-next-auth.session-token');
