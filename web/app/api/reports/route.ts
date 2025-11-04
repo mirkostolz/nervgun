@@ -3,6 +3,8 @@ import { prisma } from '../../../lib/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../lib/auth';
 import { rateLimit } from '../../../lib/rate-limit';
+import { verify } from 'jsonwebtoken';
+import { env } from '../../../env.mjs';
 
 function parseDataUrl(dataUrl: string): Buffer | null {
   try {
@@ -12,6 +14,27 @@ function parseDataUrl(dataUrl: string): Buffer | null {
   } catch {
     return null;
   }
+}
+
+// Get user ID from either session cookie or Bearer token
+async function getUserId(req: NextRequest): Promise<string | null> {
+  // Try Bearer token first (for extension)
+  const authHeader = req.headers.get('authorization');
+  if (authHeader?.startsWith('Bearer ')) {
+    const token = authHeader.substring(7);
+    try {
+      const payload = verify(token, env.NEXTAUTH_SECRET) as any;
+      if (payload.userId && payload.type === 'extension') {
+        return payload.userId;
+      }
+    } catch (e) {
+      console.error('Token verification failed:', e);
+    }
+  }
+  
+  // Fall back to session (for web app)
+  const session = await getServerSession(authOptions);
+  return session?.user?.id || null;
 }
 
 export async function GET(req: NextRequest) {
@@ -56,8 +79,8 @@ export async function POST(req: NextRequest) {
     return response;
   }
 
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
+  const userId = await getUserId(req);
+  if (!userId) {
     const response = new NextResponse('Unauthenticated', { status: 401 });
     // Add CORS headers for Chrome extension
     response.headers.set('Access-Control-Allow-Origin', req.headers.get('origin') || '*');
@@ -109,7 +132,7 @@ export async function POST(req: NextRequest) {
       title: String(body.title || ''),
       clientJson: body.client ? JSON.stringify(body.client) : null,
       screenshot: bytes,
-      authorId: session.user.id,
+      authorId: userId,
     },
     select: { id: true, createdAt: true }
   });

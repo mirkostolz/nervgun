@@ -74,6 +74,33 @@ function removeScreenshot() {
 
 // Redaction functionality removed - user should not share sensitive data
 
+// Get or refresh authentication token
+async function getAuthToken() {
+  // Check if we have a stored token
+  const storage = await chrome.storage.local.get(['authToken']);
+  if (storage.authToken) {
+    return storage.authToken;
+  }
+  
+  // Try to get a new token from the web app
+  try {
+    const res = await fetch(`${API_BASE}/api/auth/extension-token`, {
+      method: 'GET',
+      credentials: 'include' // This will use the session cookie from the web app
+    });
+    
+    if (res.ok) {
+      const data = await res.json();
+      await chrome.storage.local.set({ authToken: data.token });
+      return data.token;
+    }
+  } catch (e) {
+    console.error('Failed to get auth token:', e);
+  }
+  
+  return null;
+}
+
 // Send report function
 async function sendReport() {
   const text = (textEl.value || '').trim();
@@ -85,31 +112,23 @@ async function sendReport() {
     btnSend.disabled = true;
     btnSend.textContent = 'Sende...';
     
-    // Debug: Check if session cookie exists
-    const cookieName = '__Secure-next-auth.session-token';
-    try {
-      const cookies = await chrome.cookies.getAll({
-        url: API_BASE,
-        name: cookieName
-      });
-      console.log('Session cookie check:', cookies.length > 0 ? 'Found' : 'Not found');
-      if (cookies.length > 0) {
-        console.log('Cookie details:', {
-          domain: cookies[0].domain,
-          sameSite: cookies[0].sameSite,
-          secure: cookies[0].secure
-        });
-      } else {
-        console.warn('No session cookie found! User must login at:', API_BASE);
-      }
-    } catch (e) {
-      console.error('Cookie check error:', e);
+    // Get authentication token
+    const token = await getAuthToken();
+    if (!token) {
+      showToast('Bitte erst im Browser einloggen: ' + API_BASE, false);
+      btnSend.disabled = false;
+      btnSend.textContent = 'Senden';
+      return;
     }
+    
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    };
     
     const res = await fetch(`${API_BASE}/api/reports`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
+      headers: headers,
       body: JSON.stringify({
         text,
         url: tabInfo.url,
@@ -127,6 +146,15 @@ async function sendReport() {
       btnSend.disabled = false; 
       btnSend.textContent = 'Senden';
       return; 
+    }
+    
+    if (res.status === 401) {
+      // Token expired or invalid, clear it and retry
+      await chrome.storage.local.remove(['authToken']);
+      showToast('Bitte neu einloggen', false);
+      btnSend.disabled = false;
+      btnSend.textContent = 'Senden';
+      return;
     }
     
     if (!res.ok) { 
