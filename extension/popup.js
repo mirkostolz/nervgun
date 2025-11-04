@@ -1,5 +1,5 @@
 // Configuration
-const API_BASE = "http://localhost:3000"; // Change to your deployed web app URL after deployment
+const API_BASE = "https://nervgun-mirkostolz-gmailcoms-projects.vercel.app"; // Production URL
 
 // DOM elements (will be initialized after DOM loads)
 let textEl, btnShot, btnSend, btnRemove, shotPreview, previewImg, meta, toast;
