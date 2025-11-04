@@ -3,6 +3,7 @@ import { prisma } from '../../../lib/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../lib/auth';
 import { rateLimit } from '../../../lib/rate-limit';
+import { createHash } from 'crypto';
 
 function parseDataUrl(dataUrl: string): Buffer | null {
   try {
@@ -20,16 +21,23 @@ async function getUserId(req: NextRequest): Promise<string | null> {
   const extensionSessionToken = req.headers.get('x-session-token');
   
   if (extensionSessionToken) {
-    // Extension is sending the cookie value directly
-    // Look up session in database using the token
+    // Extension sends the raw cookie value
+    // NextAuth hashes it with SHA-256 before storing in DB
     try {
+      const hashedToken = createHash('sha256')
+        .update(extensionSessionToken)
+        .digest('hex');
+      
       const session = await prisma.session.findUnique({
-        where: { sessionToken: extensionSessionToken },
+        where: { sessionToken: hashedToken },
         include: { user: true }
       });
       
       if (session && session.expires > new Date()) {
+        console.log('✅ Extension auth successful for user:', session.userId);
         return session.userId;
+      } else {
+        console.warn('❌ Session not found or expired');
       }
     } catch (e) {
       console.error('Extension session lookup failed:', e);
