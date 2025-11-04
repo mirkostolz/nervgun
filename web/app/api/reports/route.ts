@@ -46,35 +46,59 @@ export async function POST(req: NextRequest) {
   // Rate limiting
   const rateLimitResult = rateLimit(req, '/api/reports');
   if (!rateLimitResult.allowed) {
-    return NextResponse.json(
+    const response = NextResponse.json(
       { error: 'Too many requests. Please try again later.' }, 
       { status: 429 }
     );
+    // Add CORS headers for Chrome extension
+    response.headers.set('Access-Control-Allow-Origin', req.headers.get('origin') || '*');
+    response.headers.set('Access-Control-Allow-Credentials', 'true');
+    return response;
   }
 
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
-    return new NextResponse('Unauthenticated', { status: 401 });
+    const response = new NextResponse('Unauthenticated', { status: 401 });
+    // Add CORS headers for Chrome extension
+    response.headers.set('Access-Control-Allow-Origin', req.headers.get('origin') || '*');
+    response.headers.set('Access-Control-Allow-Credentials', 'true');
+    return response;
   }
 
   const body = await req.json().catch(() => null);
   if (!body || typeof body.text !== 'string' || body.text.trim().length < 1 || body.text.length > 500) {
-    return new NextResponse('Invalid text', { status: 400 });
+    const response = new NextResponse('Invalid text', { status: 400 });
+    response.headers.set('Access-Control-Allow-Origin', req.headers.get('origin') || '*');
+    response.headers.set('Access-Control-Allow-Credentials', 'true');
+    return response;
   }
 
   let bytes: Buffer | undefined;
   if (body.screenshotDataUrl) {
     const b = parseDataUrl(body.screenshotDataUrl);
-    if (!b) return new NextResponse('Invalid image format', { status: 400 });
+    if (!b) {
+      const response = new NextResponse('Invalid image format', { status: 400 });
+      response.headers.set('Access-Control-Allow-Origin', req.headers.get('origin') || '*');
+      response.headers.set('Access-Control-Allow-Credentials', 'true');
+      return response;
+    }
     
     // Validate MIME type
     const mimeType = body.screenshotDataUrl.split(';')[0].split(':')[1];
     if (!['image/png', 'image/jpeg', 'image/jpg'].includes(mimeType)) {
-      return new NextResponse('Invalid image type. Only PNG and JPEG allowed.', { status: 400 });
+      const response = new NextResponse('Invalid image type. Only PNG and JPEG allowed.', { status: 400 });
+      response.headers.set('Access-Control-Allow-Origin', req.headers.get('origin') || '*');
+      response.headers.set('Access-Control-Allow-Credentials', 'true');
+      return response;
     }
     
     const max = Number(process.env.MAX_IMAGE_BYTES || 5242880); // 5MB for higher quality screenshots
-    if (b.byteLength > max) return new NextResponse('Image too large', { status: 413 });
+    if (b.byteLength > max) {
+      const response = new NextResponse('Image too large', { status: 413 });
+      response.headers.set('Access-Control-Allow-Origin', req.headers.get('origin') || '*');
+      response.headers.set('Access-Control-Allow-Credentials', 'true');
+      return response;
+    }
     bytes = b;
   }
 
@@ -90,5 +114,20 @@ export async function POST(req: NextRequest) {
     select: { id: true, createdAt: true }
   });
 
-  return NextResponse.json(created, { status: 201 });
+  const response = NextResponse.json(created, { status: 201 });
+  // Add CORS headers for Chrome extension
+  response.headers.set('Access-Control-Allow-Origin', req.headers.get('origin') || '*');
+  response.headers.set('Access-Control-Allow-Credentials', 'true');
+  return response;
+}
+
+// Handle preflight requests for CORS
+export async function OPTIONS(req: NextRequest) {
+  const response = new NextResponse(null, { status: 200 });
+  response.headers.set('Access-Control-Allow-Origin', req.headers.get('origin') || '*');
+  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  response.headers.set('Access-Control-Allow-Credentials', 'true');
+  response.headers.set('Access-Control-Max-Age', '86400');
+  return response;
 }
