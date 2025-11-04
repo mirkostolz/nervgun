@@ -3,8 +3,6 @@ import { prisma } from '../../../lib/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../lib/auth';
 import { rateLimit } from '../../../lib/rate-limit';
-import { verify } from 'jsonwebtoken';
-import { env } from '../../../env.mjs';
 
 function parseDataUrl(dataUrl: string): Buffer | null {
   try {
@@ -16,23 +14,29 @@ function parseDataUrl(dataUrl: string): Buffer | null {
   }
 }
 
-// Get user ID from either session cookie or Bearer token
+// Get user ID from session cookie (sent by extension via X-Session-Token header)
 async function getUserId(req: NextRequest): Promise<string | null> {
-  // Try Bearer token first (for extension)
-  const authHeader = req.headers.get('authorization');
-  if (authHeader?.startsWith('Bearer ')) {
-    const token = authHeader.substring(7);
+  // Check if extension sent session token in custom header
+  const extensionSessionToken = req.headers.get('x-session-token');
+  
+  if (extensionSessionToken) {
+    // Extension is sending the cookie value directly
+    // Look up session in database using the token
     try {
-      const payload = verify(token, env.NEXTAUTH_SECRET) as any;
-      if (payload.userId && payload.type === 'extension') {
-        return payload.userId;
+      const session = await prisma.session.findUnique({
+        where: { sessionToken: extensionSessionToken },
+        include: { user: true }
+      });
+      
+      if (session && session.expires > new Date()) {
+        return session.userId;
       }
     } catch (e) {
-      console.error('Token verification failed:', e);
+      console.error('Extension session lookup failed:', e);
     }
   }
   
-  // Fall back to session (for web app)
+  // Fall back to regular session (for web app)
   const session = await getServerSession(authOptions);
   return session?.user?.id || null;
 }

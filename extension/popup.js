@@ -74,31 +74,26 @@ function removeScreenshot() {
 
 // Redaction functionality removed - user should not share sensitive data
 
-// Get or refresh authentication token
-async function getAuthToken() {
-  // Check if we have a stored token
-  const storage = await chrome.storage.local.get(['authToken']);
-  if (storage.authToken) {
-    return storage.authToken;
-  }
-  
-  // Try to get a new token from the web app
+// Get session cookie value using Chrome's cookies API
+async function getSessionToken() {
   try {
-    const res = await fetch(`${API_BASE}/api/auth/extension-token`, {
-      method: 'GET',
-      credentials: 'include' // This will use the session cookie from the web app
+    // Read the session cookie directly from the browser
+    const cookie = await chrome.cookies.get({
+      url: API_BASE,
+      name: '__Secure-next-auth.session-token'
     });
     
-    if (res.ok) {
-      const data = await res.json();
-      await chrome.storage.local.set({ authToken: data.token });
-      return data.token;
+    if (cookie && cookie.value) {
+      console.log('✅ Session cookie found');
+      return cookie.value;
+    } else {
+      console.warn('❌ No session cookie found - user needs to login');
+      return null;
     }
   } catch (e) {
-    console.error('Failed to get auth token:', e);
+    console.error('Failed to read session cookie:', e);
+    return null;
   }
-  
-  return null;
 }
 
 // Send report function
@@ -112,18 +107,19 @@ async function sendReport() {
     btnSend.disabled = true;
     btnSend.textContent = 'Sende...';
     
-    // Get authentication token
-    const token = await getAuthToken();
-    if (!token) {
+    // Get session token from browser cookies
+    const sessionToken = await getSessionToken();
+    if (!sessionToken) {
       showToast('Bitte erst im Browser einloggen: ' + API_BASE, false);
       btnSend.disabled = false;
       btnSend.textContent = 'Senden';
       return;
     }
     
+    // Send session token in custom header (bypasses cross-origin cookie issues)
     const headers = {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
+      'X-Session-Token': sessionToken
     };
     
     const res = await fetch(`${API_BASE}/api/reports`, {
@@ -149,9 +145,7 @@ async function sendReport() {
     }
     
     if (res.status === 401) {
-      // Token expired or invalid, clear it and retry
-      await chrome.storage.local.remove(['authToken']);
-      showToast('Bitte neu einloggen', false);
+      showToast('Session abgelaufen - bitte neu einloggen', false);
       btnSend.disabled = false;
       btnSend.textContent = 'Senden';
       return;
