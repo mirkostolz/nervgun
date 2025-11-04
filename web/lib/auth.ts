@@ -69,9 +69,9 @@ export const authOptions: NextAuthOptions = {
       name: process.env.NODE_ENV === 'production' ? '__Secure-next-auth.session-token' : 'next-auth.session-token',
       options: {
         httpOnly: true,
-        sameSite: 'lax',
+        sameSite: 'none', // Changed from 'lax' to 'none' to allow Chrome extension to send cookies
         path: '/',
-        secure: process.env.NODE_ENV === 'production'
+        secure: true // Must be true when sameSite is 'none'
       }
     }
   },
