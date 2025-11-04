@@ -85,10 +85,31 @@ async function sendReport() {
     btnSend.disabled = true;
     btnSend.textContent = 'Sende...';
     
+    // Debug: Check if session cookie exists
+    const cookieName = '__Secure-next-auth.session-token';
+    try {
+      const cookies = await chrome.cookies.getAll({
+        url: API_BASE,
+        name: cookieName
+      });
+      console.log('Session cookie check:', cookies.length > 0 ? 'Found' : 'Not found');
+      if (cookies.length > 0) {
+        console.log('Cookie details:', {
+          domain: cookies[0].domain,
+          sameSite: cookies[0].sameSite,
+          secure: cookies[0].secure
+        });
+      } else {
+        console.warn('No session cookie found! User must login at:', API_BASE);
+      }
+    } catch (e) {
+      console.error('Cookie check error:', e);
+    }
+    
     const res = await fetch(`${API_BASE}/api/reports`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include', // requires you to be logged in on the site in a tab
+      credentials: 'include',
       body: JSON.stringify({
         text,
         url: tabInfo.url,
