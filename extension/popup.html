@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' http://localhost:* https://*.yourcompany.com;" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'; connect-src 'self' http://localhost:* https://*.yourcompany.com;" />
   <title>nervgun</title>
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -16,13 +16,12 @@
       <button id="btn-shot">Screenshot anhängen</button>
       <button id="btn-send" class="primary">Senden</button>
     </div>
-    <div id="shot-wrap" class="shot-wrap hidden">
-      <div class="toolbar">
-        <span>Redaktion: Ziehe schwarze Kästen über sensible Bereiche</span>
-        <button id="btn-clear">Löschen</button>
-        <button id="btn-apply">Bestätigen</button>
-      </div>
-      <canvas id="canvas"></canvas>
+    <div id="shot-preview" class="shot-preview hidden">
+      <img id="preview-img" alt="Screenshot preview" />
+      <button id="btn-remove">Screenshot entfernen</button>
+    </div>
+    <div class="disclaimer">
+      <small>⚠️ Hinweis: Bitte keine Screenshots mit privaten oder sensiblen Daten teilen.</small>
     </div>
     <div id="toast" class="toast hidden"></div>
   </div>

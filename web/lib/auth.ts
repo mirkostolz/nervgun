@@ -30,9 +30,26 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async signIn({ user }) {
+      // DEVELOPMENT MODE: Allow all emails for testing
+      // TODO: Re-enable domain restriction for production
+      const userEmail = user.email?.toLowerCase() || '';
+      
+      console.log('=== SignIn Callback (DEV MODE - All emails allowed) ===');
+      console.log('User email:', userEmail);
+      console.log('✅ Login allowed for', userEmail);
+      
+      return true; // Allow all emails
+      
+      /* PRODUCTION CODE - Uncomment to enable domain restriction:
       const domain = env.ALLOWED_EMAIL_DOMAIN.toLowerCase();
-      const ok = user.email?.toLowerCase().endsWith(`@${domain}`);
+      const ok = userEmail.endsWith(`@${domain}`);
+      
+      if (!ok) {
+        console.log(`❌ Login blocked: ${userEmail} does not end with @${domain}`);
+      }
+      
       return !!ok;
+      */
     },
     async session({ session, user }) {
       if (session.user) {
@@ -44,6 +61,10 @@ export const authOptions: NextAuthOptions = {
   },
   session: { strategy: 'database' },
   secret: env.NEXTAUTH_SECRET,
+  pages: {
+    signOut: '/',
+    error: '/auth/error',
+  },
   cookies: {
     sessionToken: {
       name: process.env.NODE_ENV === 'production' ? '__Secure-next-auth.session-token' : 'next-auth.session-token',

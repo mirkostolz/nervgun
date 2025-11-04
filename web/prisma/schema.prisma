@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Account {
@@ -73,6 +74,10 @@ model Report {
   comments    Comment[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt(sort: Desc)])
+  @@index([authorId])
 }
 
 model Upvote {
@@ -93,4 +98,7 @@ model Comment {
   report    Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
   reportId  String
   createdAt DateTime @default(now())
+
+  @@index([reportId])
+  @@index([createdAt])
 }
