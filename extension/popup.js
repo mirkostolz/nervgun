@@ -77,17 +77,41 @@ function removeScreenshot() {
 // Get session cookie value using Chrome's cookies API
 async function getSessionToken() {
   try {
-    // Read the session cookie directly from the browser
-    const cookie = await chrome.cookies.get({
+    // Try production cookie name first
+    let cookie = await chrome.cookies.get({
       url: API_BASE,
       name: '__Secure-next-auth.session-token'
     });
     
+    // Fallback to non-secure version (development)
+    if (!cookie) {
+      cookie = await chrome.cookies.get({
+        url: API_BASE,
+        name: 'next-auth.session-token'
+      });
+    }
+    
+    // Debug: List ALL cookies for this domain
+    const allCookies = await chrome.cookies.getAll({ url: API_BASE });
+    console.log('=== DEBUG: All cookies for domain ===');
+    console.log('Total cookies:', allCookies.length);
+    allCookies.forEach(c => {
+      console.log(`- ${c.name}: ${c.value.substring(0, 20)}... (secure: ${c.secure}, sameSite: ${c.sameSite})`);
+    });
+    
     if (cookie && cookie.value) {
-      console.log('✅ Session cookie found');
+      console.log('✅ Session cookie found:', cookie.name);
+      console.log('Cookie details:', {
+        secure: cookie.secure,
+        sameSite: cookie.sameSite,
+        domain: cookie.domain,
+        path: cookie.path,
+        valueLength: cookie.value.length
+      });
       return cookie.value;
     } else {
-      console.warn('❌ No session cookie found - user needs to login');
+      console.error('❌ No session cookie found!');
+      console.error('User must login at:', API_BASE);
       return null;
     }
   } catch (e) {

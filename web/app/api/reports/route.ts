@@ -20,6 +20,10 @@ async function getUserId(req: NextRequest): Promise<string | null> {
   // Check if extension sent session token in custom header
   const extensionSessionToken = req.headers.get('x-session-token');
   
+  console.log('=== getUserId DEBUG ===');
+  console.log('X-Session-Token header present:', !!extensionSessionToken);
+  console.log('Token length:', extensionSessionToken?.length || 0);
+  
   if (extensionSessionToken) {
     // Extension sends the raw cookie value
     // NextAuth hashes it with SHA-256 before storing in DB
@@ -28,10 +32,18 @@ async function getUserId(req: NextRequest): Promise<string | null> {
         .update(extensionSessionToken)
         .digest('hex');
       
+      console.log('Hashed token (first 16 chars):', hashedToken.substring(0, 16));
+      
       const session = await prisma.session.findUnique({
         where: { sessionToken: hashedToken },
         include: { user: true }
       });
+      
+      console.log('Session found:', !!session);
+      if (session) {
+        console.log('Session expires:', session.expires);
+        console.log('Session expired:', session.expires <= new Date());
+      }
       
       if (session && session.expires > new Date()) {
         console.log('✅ Extension auth successful for user:', session.userId);
@@ -42,10 +54,14 @@ async function getUserId(req: NextRequest): Promise<string | null> {
     } catch (e) {
       console.error('Extension session lookup failed:', e);
     }
+  } else {
+    console.log('No X-Session-Token header, trying regular session...');
   }
   
   // Fall back to regular session (for web app)
   const session = await getServerSession(authOptions);
+  console.log('Regular session present:', !!session);
+  console.log('Regular session user ID:', session?.user?.id || null);
   return session?.user?.id || null;
 }
 
